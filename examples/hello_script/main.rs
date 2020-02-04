@@ -36,7 +36,8 @@ fn main() -> amethyst::Result<()> {
                 )
                 // RenderFlat2D plugin is used to render entities with `SpriteRender` component.
                 .with_plugin(RenderFlat2D::default()),
-        )?;
+        )?
+        .with(ScriptSystem, "script_system", &[]);
 
     let mut game = Application::new(assets_dir, Pong, game_data)?;
     game.run();
