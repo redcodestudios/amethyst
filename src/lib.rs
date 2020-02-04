@@ -86,6 +86,8 @@ pub use amethyst_tiles as tiles;
 pub use amethyst_ui as ui;
 pub use amethyst_utils as utils;
 pub use amethyst_window as window;
+#[cfg(feature = "script")]
+pub use amethyst_script as script;
 pub use winit;
 
 pub use crate::core::{ecs, shred, shrev};
