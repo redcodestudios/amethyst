@@ -1,0 +1,6 @@
+[submodule "amethyst_script/lua/lua"]
+	path = amethyst_script/lua/lua
+	url = https://github.com/lua/lua/
+[submodule "amethyst_script/python/cpython"]
+	path = amethyst_script/python/cpython
+	url = https://github.com/python/cpython
