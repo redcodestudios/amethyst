@@ -1,0 +1,18 @@
+[package]
+name = "amethyst_script"
+version = "0.0.1"
+authors = ["Amethyst Foundation <contact@amethyst.rs>"]
+edition = "2018"
+description = "Scripting system for multiple languages"
+keywords = ["game", "engine", "scripting", "script", "amethyst"]
+categories = ["scripting", "scripting::engine"]
+license = "MIT/Apache-2.0"
+
+
+[dependencies]
+amethyst_core = { path = "../amethyst_core", version = "0.8.0" }
+libc = "0.2.0"
+
+[build-dependencies]
+cc = "1.0"
+pkg-config = "0.3"
