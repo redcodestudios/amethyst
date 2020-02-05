@@ -13,23 +13,25 @@ static PyObject* PyInit_engine(void){
     return module;
 }
 
-void call_python(int* state,  const char* script) {
+void call_python(const char* script) {
     printf("starting python\n");
     wchar_t *program = Py_DecodeLocale("", NULL);
     if (program == NULL) {
         fprintf(stderr, "Fatal error: cannot decode arg[0]\n");
         exit(1);
     }
-    PyImport_AppendInittab("engine", &PyInit_engine);
+    //PyImport_AppendInittab("engine", &PyInit_engine);
     Py_SetProgramName(program);
    
     // the python vm should be initialized before this function
     Py_Initialize();
+
+    while(!Py_IsInitialized());
     
-    PyObject* module = PyState_FindModule(&module_def);
-    if (module == NULL){
-        printf("error initializing python\n");
-    }
+    //PyObject* module = PyState_FindModule(&module_def);
+    //if (module == NULL){
+    //    printf("error initializing python\n");
+    //}
 
     FILE *script_f = fopen(script, "r");
     PyRun_SimpleFile(script_f, script);
