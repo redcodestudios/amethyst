@@ -14,12 +14,12 @@ pub enum Language {
 }
 
 pub trait Driver {
-    fn exec_script(&self, path: String) -> Result<(), ()>;
+    fn exec_script(path: String) -> Result<(), ()>;
 }
 
 pub struct PythonDriver;
 impl Driver for PythonDriver {
-    fn exec_script(&self, path: String) -> Result<(), ()>{
+    fn exec_script(path: String) -> Result<(), ()>{
         unsafe{
             call_python(CString::new(path).expect("CString::new failed").as_ptr());
         }
@@ -29,7 +29,7 @@ impl Driver for PythonDriver {
 
 pub struct LuaDriver;
 impl Driver for LuaDriver {
-    fn exec_script(&self, path: String) -> Result<(), ()> {
+    fn exec_script(path: String) -> Result<(), ()> {
         unsafe{
             call_lua(CString::new(path).expect("CString::new failed").as_ptr());
         }
@@ -39,7 +39,7 @@ impl Driver for LuaDriver {
 
 pub struct NotImplementedDriver;
 impl Driver for NotImplementedDriver {
-    fn exec_script(&self, path: String) -> Result<(), ()> {
+    fn exec_script(path: String) -> Result<(), ()> {
         eprintln!("Script driver for this language is not implemented!");
         Ok(())
     }

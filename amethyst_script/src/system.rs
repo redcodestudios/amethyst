@@ -1,36 +1,36 @@
 //!Script system
 use crate::driver::{Driver, LuaDriver};
 use amethyst_core::ecs::System;
-use std::fs;
+use std::{
+    fs,
+    marker::PhantomData,
+    path::{Path, PathBuf},
+};
 
 
-pub struct ScriptSystem;//<D: Driver> {
-    //pub script_dir: &'a str,
-    //pub driver: D
-//}
+//#[derive(Debug, derivative::Derivative)]
+//#[derivative(Default(bound = ""))]
+pub struct ScriptSystem<D: Driver> {
+    script_dir: PathBuf,
+    phantom: PhantomData<D>
+}
 
-//impl<'a, D> ScriptSystem<'a, D>
-//where
-//    D: Driver
-//{
-//    pub fn new(script_dir: &'a str, driver: D) -> Self {
-//        Self {
-//            script_dir: script_dir,
-//            driver: driver,
-//        }
-//    }
-//}
+impl <D: Driver> ScriptSystem<D> {
+    pub fn new(script_dir: PathBuf) -> Self {
+        Self {
+            script_dir: PathBuf::from(script_dir),
+            phantom: PhantomData,
+        }
+    }
+}
 
-impl<'a> System<'a> for ScriptSystem
-//where
-//    D: Driver
-{
+impl<'a, D: Driver> System<'a> for ScriptSystem<D> {
     type SystemData = ();
     fn run(&mut self, data: Self::SystemData){
-        let scripts_entries = fs::read_dir(String::from("examples/hello_script/scripts")).unwrap();
+        let scripts_entries = fs::read_dir(&self.script_dir).unwrap();
         for script_entry in scripts_entries {
             let script_path = String::from(script_entry.unwrap().path().to_str().unwrap());
-            LuaDriver.exec_script(script_path);
+            D::exec_script(script_path);
         }
     }
 }
