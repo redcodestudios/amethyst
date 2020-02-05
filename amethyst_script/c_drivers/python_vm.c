@@ -28,13 +28,9 @@ void call_python(int* state,  const char* script) {
     
     PyObject* module = PyState_FindModule(&module_def);
     if (module == NULL){
-        printf("fuck\n");
-    }else{
-        PyModule_AddObject(module, "state",
-                Py_BuildValue("i", (int) *state)
-                );
+        printf("error initializing python\n");
     }
-     
+
     FILE *script_f = fopen(script, "r");
     PyRun_SimpleFile(script_f, script);
 

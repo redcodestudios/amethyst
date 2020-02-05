@@ -2,7 +2,10 @@
 
 use amethyst::{
     prelude::*,
-    script::{system::ScriptSystem, driver::LuaDriver},
+    script::{
+        system::ScriptSystem,
+        driver::{LuaDriver, PythonDriver}
+    },
     renderer::{
         plugins::{RenderFlat2D, RenderToWindow},
         types::DefaultBackend,
@@ -20,6 +23,8 @@ fn main() -> amethyst::Result<()> {
 
     let app_root = application_root_dir()?;
     let display_config_path = app_root.join("examples/pong_tutorial_01/config/display.ron");
+    let lua_scripts_path = app_root.join("examples/hello_script/scripts/lua");
+    let python_scripts_path = app_root.join("examples/hello_script/scripts/python");
 
     // This line is not mentioned in the pong tutorial as it is specific to the context
     // of the git repository. It only is a different location to load the assets from.
@@ -37,7 +42,8 @@ fn main() -> amethyst::Result<()> {
                 // RenderFlat2D plugin is used to render entities with `SpriteRender` component.
                 .with_plugin(RenderFlat2D::default()),
         )?
-        .with(ScriptSystem, "script_system", &[]);
+        .with(ScriptSystem::<LuaDriver>::new(lua_scripts_path), "lua_script_system", &[])
+        .with(ScriptSystem::<PythonDriver>::new(python_scripts_path), "python_script_system", &[]);
 
     let mut game = Application::new(assets_dir, Pong, game_data)?;
     game.run();
