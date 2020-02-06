@@ -4,7 +4,8 @@ use amethyst::{
     prelude::*,
     script::{
         system::ScriptSystem,
-        driver::{LuaDriver, PythonDriver}
+        driver::{LuaDriver, PythonDriver},
+        component::Script,
     },
     renderer::{
         plugins::{RenderFlat2D, RenderToWindow},
@@ -15,14 +16,21 @@ use amethyst::{
 };
 
 pub struct Pong;
-
-impl SimpleState for Pong {}
+impl SimpleState for Pong {
+    fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
+        let world = data.world;
+        world
+            .create_entity()
+            .with(Script::new("pong.lua"))
+            .build();
+    }
+}
 
 fn main() -> amethyst::Result<()> {
     amethyst::start_logger(Default::default());
 
     let app_root = application_root_dir()?;
-    let display_config_path = app_root.join("examples/pong_tutorial_01/config/display.ron");
+    let display_config_path = app_root.join("examples/hello_script/config/display.ron");
     let lua_scripts_path = app_root.join("examples/hello_script/scripts/lua");
     let python_scripts_path = app_root.join("examples/hello_script/scripts/python");
 
