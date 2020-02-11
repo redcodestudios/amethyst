@@ -4,6 +4,7 @@ use crate::component::Script;
 use amethyst_core::ecs::{
     System,
     storage::ReadStorage,
+    Join,
 };
 use std::{
     fs,
@@ -12,8 +13,6 @@ use std::{
 };
 
 
-//#[derive(Debug, derivative::Derivative)]
-//#[derivative(Default(bound = ""))]
 pub struct ScriptSystem<D: Driver> {
     script_dir: PathBuf,
     phantom: PhantomData<D>
@@ -30,11 +29,17 @@ impl <D: Driver> ScriptSystem<D> {
 
 impl<'a, D: Driver> System<'a> for ScriptSystem<D> {
     type SystemData = (ReadStorage<'a, Script>);
-    fn run(&mut self, data: Self::SystemData){
-        let scripts_entries = fs::read_dir(&self.script_dir).unwrap();
-        for script_entry in scripts_entries {
-            let script_path = String::from(script_entry.unwrap().path().to_str().unwrap());
-            D::exec_script(script_path);
+    fn run(&mut self, scripts: Self::SystemData){
+        for script in scripts.join() {
+            let mut path = PathBuf::from(&self.script_dir);
+            path.push(script.path.clone());
+            if(path.exists()) {
+                D::exec_script(path);
+            } else if(script.path.exists()) {
+                D::exec_script(script.path.clone());
+            }else{
+                eprintln!("Invalid script path '{}'!", path.display());
+            }
         }
     }
 }

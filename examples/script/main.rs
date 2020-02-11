@@ -21,7 +21,7 @@ impl SimpleState for Pong {
         let world = data.world;
         world
             .create_entity()
-            .with(Script::new("pong.lua"))
+            .with(Script::new_from_string("pong.lua"))
             .build();
     }
 }
@@ -30,9 +30,9 @@ fn main() -> amethyst::Result<()> {
     amethyst::start_logger(Default::default());
 
     let app_root = application_root_dir()?;
-    let display_config_path = app_root.join("examples/hello_script/config/display.ron");
-    let lua_scripts_path = app_root.join("examples/hello_script/scripts/lua");
-    let python_scripts_path = app_root.join("examples/hello_script/scripts/python");
+    let display_config_path = app_root.join("examples/script/config/display.ron");
+    let lua_scripts_path = app_root.join("examples/script/scripts/lua");
+    let python_scripts_path = app_root.join("examples/script/scripts/python");
 
     // This line is not mentioned in the pong tutorial as it is specific to the context
     // of the git repository. It only is a different location to load the assets from.
