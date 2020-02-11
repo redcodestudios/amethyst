@@ -4,13 +4,21 @@ use amethyst_core::{
     }
 };
 
+use std::{
+   path::PathBuf, 
+};
+
 pub struct Script {
-    path: String,
+    pub path: PathBuf,
 }
 
 impl Script {
-    pub fn new<S: Into<String>>(path: S) -> Self {
-        Self { path: path.into() }
+    pub fn new(path: PathBuf) -> Self {
+        Self { path: path }
+    }
+    
+    pub fn new_from_string<S: Into<String>>(path: S) -> Self {
+        Self { path: PathBuf::from(path.into()) }
     }
 }
 
