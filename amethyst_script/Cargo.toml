@@ -11,6 +11,7 @@ license = "MIT/Apache-2.0"
 
 [dependencies]
 amethyst_core = { path = "../amethyst_core", version = "0.8.0" }
+amethyst_lib = { path = "../amethyst_lib", version = "0.0.1" }
 libc = "0.2.0"
 
 [build-dependencies]
