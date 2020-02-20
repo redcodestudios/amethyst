@@ -18,8 +18,9 @@ fn main() {
         cc::Build::new()
             .flag("-I")
             .flag("lua/src/")
+            .include("../amethyst_lib/c_headers")
             .flag("-llua")
-            //.object("../target/debug/libscripting_api.so")
+            .object("../target/debug/libamethyst_lib.so")
             .file("c_drivers/lua_vm.c")
             .compile("lua_vm");
    
