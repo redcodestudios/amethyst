@@ -21,8 +21,19 @@ static int wrapper_log(lua_State *L) {
    return 1;
 }
 
+static int wrapper_moveup(lua_State *L) {
+    if (!lua_checkstack(L, 2)) {
+        printf("not enough arguments\n");
+        return 0;
+    }
+    Transform* t = lua_touserdata(L, 1);
+    double amount = lua_tonumber(L, 2);
+    move_up(t, (float) amount);
+    return 1;
+}
+
 void call_lua(const char* script, Transform* t) {
-  //  pwd();
+    //pwd();
     rust_log("DEU BOM");
 
     //Transform* t = get_transform(components);
@@ -30,7 +41,7 @@ void call_lua(const char* script, Transform* t) {
     //print_addr(t);
     //printf("VM SAYS: address is : %p\n", t);
     //printf("VM SAYS: transform y is %f\n", translation_y(t));
-    move_up(t, 50);    
+    //move_up(t, 50);    
     //printf("VM SAYS: now transform y is %f\n", translation_y(t));
     
     lua_State *L;
@@ -39,11 +50,21 @@ void call_lua(const char* script, Transform* t) {
     luaL_openlibs(L);
 
     lua_pushcfunction(L, wrapper_log);
-    lua_setglobal(L, "rust_log"); luaL_loadfile(L, script);
+    lua_setglobal(L, "rust_log");
+
+    lua_pushcfunction(L, wrapper_moveup);
+    lua_setglobal(L, "move_up");
+    
+    lua_pushlightuserdata(L, t);
+    lua_setglobal(L, "Transform");
+    
+    luaL_loadfile(L, script);
 
     if (lua_pcall(L, 0, 0, 0))
         printf("C: falhou: %s\n", lua_tostring(L, -1));
-   
+    
+    lua_getglobal(L, "Transform");
+    t = (Transform*)lua_touserdata(L, -1);
     //*transform = *t;
     lua_close(L);
 }
