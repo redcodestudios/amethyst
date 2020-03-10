@@ -358,8 +358,8 @@ path = "examples/tiles/main.rs"
 required-features = [ "tiles" ]
 
 [[example]]
-name = "hello_script"
-path = "examples/hello_script/main.rs"
+name = "script"
+path = "examples/script/main.rs"
 
 [package.metadata.docs.rs]
 features = ["animation", "audio", "gltf", "tiles", "json", "locale", "network", "sdl_controller", "vulkan", "script"]

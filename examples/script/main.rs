@@ -2,6 +2,8 @@
 
 use amethyst::{
     prelude::*,
+    core::{TransformBundle, transform::Transform},
+    ecs::{storage::Storage},
     script::{
         system::ScriptSystem,
         driver::{LuaDriver, PythonDriver},
@@ -19,12 +21,22 @@ pub struct Pong;
 impl SimpleState for Pong {
     fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let world = data.world;
-        world
+
+        let entity = world
             .create_entity()
             .with(Script::new_from_string("pong.lua"))
-            .build();
+            .with(Transform::default())
+            .build();    
     }
 }
+
+/*#
+ * pub struct ScriptSys;
+ *
+ * impl System for ScriptSys {
+ *  type Storage = (ReadStorage<'a, Transform>)
+ * }
+ * */
 
 fn main() -> amethyst::Result<()> {
     amethyst::start_logger(Default::default());
@@ -50,6 +62,7 @@ fn main() -> amethyst::Result<()> {
                 // RenderFlat2D plugin is used to render entities with `SpriteRender` component.
                 .with_plugin(RenderFlat2D::default()),
         )?
+        .with_bundle(TransformBundle::new())?
         .with(ScriptSystem::<LuaDriver>::new(lua_scripts_path), "lua_script_system", &[])
         .with(ScriptSystem::<PythonDriver>::new(python_scripts_path), "python_script_system", &[]);
 

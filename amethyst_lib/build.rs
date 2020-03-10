@@ -10,5 +10,5 @@ fn main() {
         .with_language(cbindgen::Language::C)
         .generate()
         .unwrap()
-        .write_to_file("c_headers/engine.h");
+        .write_to_file("c_headers/generated_engine.h");
 }
