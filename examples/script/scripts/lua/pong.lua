@@ -1,3 +1,3 @@
 rust_log("LUA: executing rust_log function")
-print(type(Transform))
-move_up(Transform, 50)
+print(type(Transform.ref))
+Transform:move_up(0.2)
