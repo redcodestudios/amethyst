@@ -21,3 +21,9 @@ thumbs.db
 
 # Thread profiler output
 thread_profile.json
+
+# Script generated files
+*.o
+*.a
+lua
+
