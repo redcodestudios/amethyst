@@ -6,7 +6,8 @@ use amethyst::{
     core::{TransformBundle, transform::Transform},
     ecs::{storage::Storage, VecStorage, Component},
     script::{
-        system::ScriptSystem,
+        bundle::ScriptBundle,
+        system::{ScriptSystem, ScriptAssetSystemDesc, ScriptAssetSystem},
         driver::{LuaDriver, PythonDriver},
         component::Script,
         asset::Script as ScriptAsset,
@@ -106,7 +107,7 @@ impl SimpleState for Pong {
     fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let world = data.world;
         
-        self.script_handle.replace(load_script(world));
+        //self.script_handle.replace(load_script(world));
 
         //let storage = Read<AssetStorage::<ScriptAsset>>;
         //let s = storage.get(script_handle);
@@ -134,16 +135,16 @@ impl SimpleState for Pong {
     //    }
         
          // importante
-        data.data.update(&mut data.world);
+        //data.data.update(&mut data.world);
         
-        let storage = data.world.read_resource::<AssetStorage<ScriptAsset>>();
-        for sh in [&self.script_handle].iter() {
-            if let Some(s) = sh.as_ref().and_then(|sh| storage.get(sh)){
-                println!("{}", s.clone().to_string().unwrap());
-            }else{
-                println!("lixo");
-            }
-        }
+        //let storage = data.world.read_resource::<AssetStorage<ScriptAsset>>();
+        //for sh in [&self.script_handle].iter() {
+        //    if let Some(s) = sh.as_ref().and_then(|sh| storage.get(sh)){
+        //        println!("{}", s.clone().to_string().unwrap());
+        //    }else{
+        //        println!("lixo");
+        //    }
+        //}
         Trans::None
     }
 }
@@ -183,7 +184,11 @@ fn main() -> amethyst::Result<()> {
         .with_bundle(TransformBundle::new())?
         .with(ScriptSystem::<LuaDriver>::new(lua_scripts_path), "lua_script_system", &[])
         .with(ScriptSystem::<PythonDriver>::new(python_scripts_path), "python_script_system", &[])
-        .with(Processor::<ScriptAsset>::new(), "processor", &[]);
+        .with_bundle(ScriptBundle::new())?;
+        //.with_system_desc(ScriptAssetSystemDesc::<LuaDriver>::new(), "", &[])
+        //.with(ScriptAssetSystem::default(), "", &[])
+        //.with(Processor::<ScriptAsset>::new(), "processor", &[]);
+        
 
     let mut game = Application::new(assets_dir, Pong::default(), game_data)?;
     game.run();
