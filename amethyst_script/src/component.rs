@@ -11,16 +11,17 @@ use std::{
 
 #[derive(Debug, Clone)]
 pub struct Script {
+    pub is_started: bool,
     pub path: PathBuf,
 }
 
 impl Script {
     pub fn new(path: PathBuf) -> Self {
-        Self { path: path}
+        Self { is_started: false, path: path}
     }
     
     pub fn new_from_string<S: Into<String>>(path: S) -> Self {
-        Self { path: PathBuf::from(path.into())}
+        Self { is_started: false, path: PathBuf::from(path.into())}
     }
 }
 

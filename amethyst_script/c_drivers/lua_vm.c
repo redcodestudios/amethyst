@@ -75,3 +75,19 @@ void call_lua(const char* script, Transform* t) {
     
     lua_close(L);
 }
+
+void call_on_start_lua(const char* script) {
+    lua_State* L;
+    L = luaL_newstate();
+    luaL_openlibs(L);
+
+    luaL_dofile(L, script);
+     
+    lua_getglobal(L, "start");
+
+    if(lua_pcall(L, 0, 0, 0) != 0) {
+        printf("error running function `on_start`: %s\n", lua_tostring(L, -1));
+    }
+
+    lua_close(L);
+}

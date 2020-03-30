@@ -2,13 +2,15 @@
 
 use amethyst::{
     prelude::*,
-    assets::{AssetStorage, Handle, Loader},
+    assets::{AssetStorage, Handle, Loader, Processor},
     core::{TransformBundle, transform::Transform},
-    ecs::{storage::Storage},
+    ecs::{storage::Storage, VecStorage, Component},
     script::{
         system::ScriptSystem,
         driver::{LuaDriver, PythonDriver},
         component::Script,
+        asset::Script as ScriptAsset,
+        formats::{LuaFormat, ScriptData},
     },
     renderer::{
         plugins::{RenderFlat2D, RenderToWindow},
@@ -81,15 +83,33 @@ fn load_sprite_sheet(world: &mut World) -> Handle<SpriteSheet> {
     )
 }
 
+fn load_script(world: &mut World) -> Handle<ScriptAsset> {
+
+    let loader = world.read_resource::<Loader>();
+    let script_storage = world.read_resource::<AssetStorage<ScriptAsset>>();
+    
+    loader.load(
+        "scripts/lua/pong.lua",
+        LuaFormat::default(),
+        (),
+        &script_storage,
+    )
+}
+
 #[derive(Default)]
 pub struct Pong {
     sprite_sheet_handle: Option<Handle<SpriteSheet>>,
+    script_handle: Option<Handle<ScriptAsset>>,
 }
 
 impl SimpleState for Pong {
     fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let world = data.world;
+        
+        self.script_handle.replace(load_script(world));
 
+        //let storage = Read<AssetStorage::<ScriptAsset>>;
+        //let s = storage.get(script_handle);
         //let entity = world
         //    .create_entity()
         //    .with(Script::new_from_string("pong.lua"))
@@ -99,6 +119,32 @@ impl SimpleState for Pong {
         self.sprite_sheet_handle.replace(load_sprite_sheet(world));
         initialise_camera(world);
         initialise_ball(world, self.sprite_sheet_handle.clone().unwrap());
+    }
+
+    fn update(&mut self, data: &mut StateData<'_, GameData<'_, '_>>) -> SimpleTrans{ 
+    //
+    //    let storage = AssetStorage::<ScriptAsset>::new();
+    //    
+    //    match storage.get(self.script_handle.as_ref().unwrap()){
+    //        Some(s) => {
+    //            let s1 = s.clone().to_string().unwrap();
+    //            println!("{}", s1);
+    //        },
+    //         _ => println!("miou")
+    //    }
+        
+         // importante
+        data.data.update(&mut data.world);
+        
+        let storage = data.world.read_resource::<AssetStorage<ScriptAsset>>();
+        for sh in [&self.script_handle].iter() {
+            if let Some(s) = sh.as_ref().and_then(|sh| storage.get(sh)){
+                println!("{}", s.clone().to_string().unwrap());
+            }else{
+                println!("lixo");
+            }
+        }
+        Trans::None
     }
 }
 
@@ -120,7 +166,7 @@ fn main() -> amethyst::Result<()> {
 
     // This line is not mentioned in the pong tutorial as it is specific to the context
     // of the git repository. It only is a different location to load the assets from.
-    let assets_dir = app_root.join("examples/assets/");
+    let assets_dir = app_root.join("examples/script/assets");
 
     let game_data = GameDataBuilder::default()
         .with_bundle(
@@ -136,7 +182,8 @@ fn main() -> amethyst::Result<()> {
         )?
         .with_bundle(TransformBundle::new())?
         .with(ScriptSystem::<LuaDriver>::new(lua_scripts_path), "lua_script_system", &[])
-        .with(ScriptSystem::<PythonDriver>::new(python_scripts_path), "python_script_system", &[]);
+        .with(ScriptSystem::<PythonDriver>::new(python_scripts_path), "python_script_system", &[])
+        .with(Processor::<ScriptAsset>::new(), "processor", &[]);
 
     let mut game = Application::new(assets_dir, Pong::default(), game_data)?;
     game.run();

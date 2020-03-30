@@ -16,9 +16,6 @@ use std::{
     path::{Path, PathBuf},
 };
 
-pub struct EntityComponents {
-    pub transform: Transform,
-}
 
 pub struct ScriptSystem<D: Driver> {
     script_dir: PathBuf,
@@ -35,35 +32,22 @@ impl <D: Driver> ScriptSystem<D> {
 }
 
 impl<'a, D: Driver> System<'a> for ScriptSystem<D> {
-    type SystemData = (ReadStorage<'a, Script>, WriteStorage<'a, Transform>);
+    type SystemData = (WriteStorage<'a, Script>, WriteStorage<'a, Transform>);
     
-    fn run(&mut self, (scripts, mut transforms): Self::SystemData){
-        for (script, mut maybe_transform) in (&scripts, (&mut transforms).maybe()).join() {
+    fn run(&mut self, (mut scripts, mut transforms): Self::SystemData){
+        for (mut script, mut maybe_transform) in (&mut scripts, (&mut transforms).maybe()).join() {
             let mut path = PathBuf::from(&self.script_dir);
             path.push(script.path.clone());
             
-            //let mut default_t = Transform::default();
-            //let mut transform: &mut Transform = match maybe_transform {
-            //    Some(mut transform) => &mut transform,
-            //    None => {
-            //       let mut t = Transform::default();
-            //        &mut t
-            //   },
-            //};
-            
+            if(!script.is_started) {
+                D::exec_on_start(path.clone());
+                script.is_started = true;
+            }
+             
             let mut tdf = Transform::default();
             let mut transform: &mut Transform = maybe_transform.unwrap_or(&mut tdf);
             println!("RUST: transform is {}", (*transform).translation().y);
             
-            //maybe_transform.unwrap_or(&mut df);
-
-            //if let Some(mut transform) = maybe_transform {
-            //    println!("{}", transform.translation().y);
-            //    transform.move_up(50.0);
-            //}
-            
-            //let mut components = EntityComponents {transform: transform};
-            //transform.move_up(50.0);
             if(path.exists()) {
                 unsafe {
                     D::exec_script(path, transform);

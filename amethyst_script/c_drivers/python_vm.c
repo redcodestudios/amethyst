@@ -41,3 +41,7 @@ void call_python(const char* script) {
     }
     PyMem_RawFree(program);
 }
+
+void call_on_start_py(const char* script) {
+
+}
