@@ -1,7 +1,7 @@
 use crate::{
-    asset::Script as ScriptAsset,
-    system::{ScriptAssetSystemDesc, ScriptAssetSystem},
-    driver::LuaDriver,
+    asset::Script,
+    system::{ScriptSystemDesc, ScriptSystem},
+    driver::{Driver, Language, LuaVM},
 };
 
 use amethyst_error::Error;
@@ -17,6 +17,7 @@ use amethyst_assets::Processor;
 #[derive(Debug, Default)]
 pub struct ScriptBundle<'a> {
     dep: &'a [&'a str],
+    languages: Vec<Language>
 }
 
 impl<'a> ScriptBundle<'a> {
@@ -24,7 +25,13 @@ impl<'a> ScriptBundle<'a> {
     pub fn new() -> Self {
         ScriptBundle {
             dep: Default::default(),
+            languages: Vec::new()
         }
+    }
+
+    pub fn with_language(mut self, lang: Language) -> Self {
+        self.languages.push(lang);
+        self
     }
 
     /// Set dependencies for the `ScriptSystem`
@@ -41,15 +48,30 @@ impl<'a, 'b, 'c> SystemBundle<'a, 'b> for ScriptBundle<'c> {
         builder: &mut DispatcherBuilder<'a, 'b>,
     ) -> Result<(), Error> {
         builder.add(
-            Processor::<ScriptAsset>::new(),
+            Processor::<Script>::new(),
             "script_asset_processor",
             self.dep,
         );
-        builder.add(
-            ScriptAssetSystemDesc::<LuaDriver>::new().build(world),
-            "script_asset_system_desc",
-            &["script_asset_processor"],
-        );
+
+        for lang in self.languages {
+            match lang {
+                Language::Lua(path) => {
+                    builder.add(
+                        ScriptSystemDesc::<LuaVM>::new(path).build(world),
+                        "script_system_lua",
+                        &["script_asset_processor"],
+                    );
+                },
+                Language::Python(path) => {
+                    builder.add(
+                        // change to python vm
+                        ScriptSystemDesc::<LuaVM>::new(path).build(world),
+                        "script_system_python",
+                        &["script_asset_processor"],
+                    );
+                }
+            }
+        }
         Ok(())
     }
 }

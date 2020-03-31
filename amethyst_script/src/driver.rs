@@ -1,77 +1,51 @@
-use std::ffi::CString;
-use std::os::raw::c_char;
 use std::path::PathBuf;
+use std::sync::{Arc, Mutex};
 
-use amethyst_core::transform::Transform;
+#[repr(C)]
+#[derive(Clone)]
+pub struct lua_State { private: [u8; 0] }
 
-// C driver functions
-extern {
-    fn call_python(path: *const c_char, transform: *mut Transform);
-    fn call_on_start_py(path: *const c_char);
-    
+extern { 
+    fn luaL_newstate() -> *mut lua_State;
+    fn luaL_openlibs(l: *mut lua_State);
+    fn test_call_lua(l: *mut lua_State, source: *const u8, size: usize);
+}
 
-    fn call_lua(path: *const c_char, transform: *mut Transform);
-    fn call_on_start_lua(path: *const c_char);
+#[derive(Debug)]
+pub enum Language {
+    Lua(PathBuf),
+    Python(PathBuf),
 }
 
 pub trait Driver {
-    fn exec_script(path: PathBuf, transform: *mut Transform) -> Result<(), ()>;
-    fn exec_on_start(path: PathBuf) -> Result<(), ()>;
+    fn new() -> Self;
+    fn run(self, source: Vec<u8>);
 }
 
-pub struct PythonDriver;
-impl Driver for PythonDriver {
-    fn exec_script(path: PathBuf, transform: *mut Transform) -> Result<(), ()>{
-        unsafe{
-            let script_path = String::from(path.to_str().unwrap());
-            //let b = Box::new(transform);
-            //let transform_ptr = Box::into_raw(b);
-            
-            call_python(
-                CString::new(script_path).expect("CString::new failed").as_ptr(),
-                transform
-            );
-        }
-        Ok(())
-    }
-
-    fn exec_on_start(path: PathBuf) -> Result<(), ()> {
-        unsafe {
-            let script_path = String::from(path.to_str().unwrap());
-
-            call_on_start_py(
-                CString::new(script_path).expect("CString::new failed").as_ptr()
-            );
-        }
-        Ok(())
-    }
+#[derive(Clone)]
+pub struct LuaVM {
+    running: bool,
+    state: Arc<Mutex<*mut lua_State>>
 }
 
-pub struct LuaDriver;
-impl Driver for LuaDriver {
-    fn exec_script(path: PathBuf,  transform: *mut Transform) -> Result<(), ()> {
-        unsafe{
-            let script_path = String::from(path.to_str().unwrap());
-            //let b = Box::new(transform);
-            //let transform_ptr = Box::into_raw(b);
-            
-            call_lua(
-                CString::new(script_path).expect("CString::new failed").as_ptr(),
-                transform
-            );
+unsafe impl Send for LuaVM{}
+
+impl Driver for LuaVM {
+    fn new() -> Self {
+        unsafe {
+            let s = luaL_newstate();
+            luaL_openlibs(s);
+            Self {running: false, state: Arc::new(Mutex::new(s))}
         }
-        Ok(())
     }
 
-    fn exec_on_start(path: PathBuf) -> Result<(), ()> {
+    fn run(mut self, source: Vec<u8>) {
+        self.running = true;
         unsafe {
-            let script_path = String::from(path.to_str().unwrap());
-
-            call_on_start_lua(
-                CString::new(script_path).expect("CString::new failed").as_ptr()
-            );
+            let s = *Arc::try_unwrap(self.state).unwrap_err().lock().unwrap();
+            test_call_lua(s, source.as_ptr(), source.len());
         }
-        Ok(())
+        self.running = false;
     }
 }
 

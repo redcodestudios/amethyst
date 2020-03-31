@@ -7,10 +7,8 @@ use amethyst::{
     ecs::{storage::Storage, VecStorage, Component},
     script::{
         bundle::ScriptBundle,
-        system::{ScriptSystem, ScriptAssetSystemDesc, ScriptAssetSystem},
-        driver::{LuaDriver, PythonDriver},
-        component::Script,
-        asset::Script as ScriptAsset,
+        driver::Language,
+        asset::Script,
         formats::{LuaFormat, ScriptData},
     },
     renderer::{
@@ -48,13 +46,6 @@ fn initialise_ball(world: &mut World, sprite_sheet_handle: Handle<SpriteSheet>) 
         sprite_sheet: sprite_sheet_handle,
         sprite_number: 1, // ball is the second sprite on the sprite_sheet
     };
-
-    world
-        .create_entity()
-        .with(sprite_render)
-        .with(local_transform)
-        .with(Script::new_from_string("pong.lua"))
-        .build();
 }
 
 fn load_sprite_sheet(world: &mut World) -> Handle<SpriteSheet> {
@@ -84,86 +75,28 @@ fn load_sprite_sheet(world: &mut World) -> Handle<SpriteSheet> {
     )
 }
 
-fn load_script(world: &mut World) -> Handle<ScriptAsset> {
-
-    let loader = world.read_resource::<Loader>();
-    let script_storage = world.read_resource::<AssetStorage<ScriptAsset>>();
-    
-    loader.load(
-        "scripts/lua/pong.lua",
-        LuaFormat::default(),
-        (),
-        &script_storage,
-    )
-}
-
 #[derive(Default)]
 pub struct Pong {
     sprite_sheet_handle: Option<Handle<SpriteSheet>>,
-    script_handle: Option<Handle<ScriptAsset>>,
 }
 
 impl SimpleState for Pong {
     fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let world = data.world;
-        
-        //self.script_handle.replace(load_script(world));
-
-        //let storage = Read<AssetStorage::<ScriptAsset>>;
-        //let s = storage.get(script_handle);
-        //let entity = world
-        //    .create_entity()
-        //    .with(Script::new_from_string("pong.lua"))
-        //    .with(Transform::default())
-        //    .build();    
-        
+         
         self.sprite_sheet_handle.replace(load_sprite_sheet(world));
         initialise_camera(world);
         initialise_ball(world, self.sprite_sheet_handle.clone().unwrap());
     }
-
-    fn update(&mut self, data: &mut StateData<'_, GameData<'_, '_>>) -> SimpleTrans{ 
-    //
-    //    let storage = AssetStorage::<ScriptAsset>::new();
-    //    
-    //    match storage.get(self.script_handle.as_ref().unwrap()){
-    //        Some(s) => {
-    //            let s1 = s.clone().to_string().unwrap();
-    //            println!("{}", s1);
-    //        },
-    //         _ => println!("miou")
-    //    }
-        
-         // importante
-        //data.data.update(&mut data.world);
-        
-        //let storage = data.world.read_resource::<AssetStorage<ScriptAsset>>();
-        //for sh in [&self.script_handle].iter() {
-        //    if let Some(s) = sh.as_ref().and_then(|sh| storage.get(sh)){
-        //        println!("{}", s.clone().to_string().unwrap());
-        //    }else{
-        //        println!("lixo");
-        //    }
-        //}
-        Trans::None
-    }
 }
-
-/*#
- * pub struct ScriptSys;
- *
- * impl System for ScriptSys {
- *  type Storage = (ReadStorage<'a, Transform>)
- * }
- * */
 
 fn main() -> amethyst::Result<()> {
     amethyst::start_logger(Default::default());
 
     let app_root = application_root_dir()?;
     let display_config_path = app_root.join("examples/script/config/display.ron");
-    let lua_scripts_path = app_root.join("examples/script/scripts/lua");
-    let python_scripts_path = app_root.join("examples/script/scripts/python");
+    let lua_scripts_path = app_root.join("examples/script/assets/scripts/lua");
+    let python_scripts_path = app_root.join("examples/script/assets/scripts/python");
 
     // This line is not mentioned in the pong tutorial as it is specific to the context
     // of the git repository. It only is a different location to load the assets from.
@@ -182,9 +115,11 @@ fn main() -> amethyst::Result<()> {
                 .with_plugin(RenderFlat2D::default()),
         )?
         .with_bundle(TransformBundle::new())?
-        .with(ScriptSystem::<LuaDriver>::new(lua_scripts_path), "lua_script_system", &[])
-        .with(ScriptSystem::<PythonDriver>::new(python_scripts_path), "python_script_system", &[])
-        .with_bundle(ScriptBundle::new())?;
+        .with_bundle(
+            ScriptBundle::new()
+                .with_language(Language::Lua(lua_scripts_path))
+                //.with_language(Language::Python(python_scripts_path))
+        )?;
         //.with_system_desc(ScriptAssetSystemDesc::<LuaDriver>::new(), "", &[])
         //.with(ScriptAssetSystem::default(), "", &[])
         //.with(Processor::<ScriptAsset>::new(), "processor", &[]);
