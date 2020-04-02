@@ -5,14 +5,32 @@ use std::ptr;
 use amethyst_core::{
     transform::Transform,
     ecs::{
-        storage::VecStorage, Component
+        Entities,
+        Component,
     }
 };
+
+//pub struct ScriptContext {
+//    pub components_map: HashMap<String, (fn() -> dyn Component)>;
+//}
 
 // duplicated structure because of cyclic dependecy
 pub struct EntityComponents {
     pub transform: Transform,
 }
+
+//#[no_mangle]
+//pub extern "C" fn create_entity(entities: Entities, component: String,) {
+    //let builder = entities.build_entity();
+
+    //match component.as_str() {
+    //    "Transform" => {
+    //        builder.with(Transform::default());
+    //        builder.build();
+    //    },
+    //    _ => {builder.build();},
+    //}
+//}
 
 #[no_mangle]
 pub extern "C" fn get_transform(components: *mut EntityComponents) -> *mut &'static Transform {

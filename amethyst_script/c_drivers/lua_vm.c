@@ -57,10 +57,10 @@ void create_transform_table_instance(lua_State *L, Transform* t) {
 
 void test_call_lua(lua_State* state, const unsigned char* source, size_t size) {
     if(luaL_loadbuffer(state, source, size, "script xaaab")){
-        fprintf(stderr, "%s\n", lua_tostring(state, -1));
+        fprintf(stderr, "Lua `ERROR`: `%s\n`", lua_tostring(state, -1));
     }
     if(lua_pcall(state, 0, 0, 0)){
-        fprintf(stderr, "%s\n", lua_tostring(state, -1));
+        fprintf(stderr, "Lua `ERROR`: `%s\n`", lua_tostring(state, -1));
     }
 }
 

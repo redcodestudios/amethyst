@@ -2,7 +2,8 @@
 use crate::{
         asset::Script,
         formats::{LuaFormat, ScriptData},
-        driver::{Driver, Language, LuaVM}
+        driver::{Driver, Language, LuaVM},
+        res::*,
 };
 use amethyst_core::{
     SystemDesc,
@@ -13,8 +14,8 @@ use amethyst_core::{
         World,
         System,
         Read,
-        storage::{ReadStorage, WriteStorage},
-        Join,
+        Entities,
+        shred::{Accessor, AccessorCow, System as ShredSys, SystemData as SysDataShred, RunNow},
     }
 };
 
@@ -26,36 +27,65 @@ use std::{
     fs,
     marker::PhantomData,
     path::{Path, PathBuf},
+    collections::HashMap,
 };
 
 
 type ScriptHandles = Vec<Option<Handle<Script>>>;
-type Pool<T> = Vec<T>;
+type ScriptableResources = HashMap<String, HashMap<String, String>>;
 
-#[derive(Default)]
 pub struct ScriptSystem<D: Driver> {
     handles: ScriptHandles,
-    pool: Pool<D>,
+    driver: D,
+    script_world: World,
+    accessor: ScriptingResAccessor,
 }
 
 impl<D: Driver> ScriptSystem<D> {
-    fn new(handles: ScriptHandles, pool: Pool<D>) -> Self {
-        Self {handles: handles, pool: pool}
+    fn new(handles: ScriptHandles, driver: D, script_world: World, accessor: ScriptingResAccessor) -> Self {
+        Self {
+            handles: handles,
+            driver: driver,
+            script_world: script_world,
+            accessor: accessor,
+        }
     }
 }
 
 impl<'a, D: std::clone::Clone + Driver> System<'a> for ScriptSystem<D> {
     type SystemData = Read<'a, AssetStorage::<Script>>;
 
-    fn run(&mut self, data: Self::SystemData) {
+    fn run(&mut self, assets: Self::SystemData) {
         for sh in &self.handles {
-            if let Some(s) = sh.as_ref().and_then(|sh| data.get(sh)){
-                self.pool[0].clone().run(s.bytes.clone()); 
-                //println!("{}", s.clone().to_string().unwrap());
+            if let Some(s) = sh.as_ref().and_then(|sh| assets.get(sh)){
+                self.driver.clone().run(s.bytes.clone());
+                let mut sys = MySys{accessor: self.accessor.clone()};
+                sys.run_now(&self.script_world);
             }else{
                 println!("lixo");
             }
         }
+    }
+}
+
+pub struct MySys {
+    accessor: ScriptingResAccessor,
+}
+
+impl<'a> ShredSys<'a> for MySys {
+    type SystemData = ScriptingResData<'a>;
+    
+    fn run(&mut self, data: Self::SystemData) {
+        for scripting_resource in data.reads {
+            println!(
+                "Fields of run-time resource: {:?}",
+                scripting_resource.fields
+            );
+        }
+    }
+
+    fn accessor<'b>(&'b self) -> AccessorCow<'a, 'b, Self> {
+        AccessorCow::Ref(&self.accessor)
     }
 }
 
@@ -97,10 +127,25 @@ impl<'a, 'b, D: Driver + std::clone::Clone> SystemDesc<'a, 'b, ScriptSystem<D>> 
     fn build(self, world: &mut World) -> ScriptSystem<D> {
         <ScriptSystem<D> as System<'_>>::SystemData::setup(world);
 
-        let mut pool = Vec::with_capacity(10);
-        for _ in 0..10 {
-            pool.push(D::new());
-        }
-        ScriptSystem::<D>::new(self.load_multiple_lua_scripts(world), pool)
+        let mut script_world = World::empty();
+
+        let mut interface = ScriptingInterface::new();
+
+        interface.add_rt_resource(
+            "Foo",
+            ScriptableResource {
+                fields: (vec![("foo_field".to_owned(), "5".to_owned())].into_iter().collect()),
+            },
+            &mut script_world,
+        );
+        script_world.insert(interface); 
+        let mut accessor = ScriptingResAccessor::new(&["Foo"], &script_world);
+
+        ScriptSystem::<D>::new(
+            self.load_multiple_lua_scripts(world),
+            D::new(),
+            script_world,
+            accessor,
+        )
     }
 }
