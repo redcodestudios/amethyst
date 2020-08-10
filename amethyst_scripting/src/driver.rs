@@ -3,13 +3,13 @@ use std::sync::{Arc, Mutex};
 
 #[repr(C)]
 #[derive(Clone)]
-pub struct C_lua_State { private: [u8; 0] }
+pub struct lua_State { private: [u8; 0] }
 
 extern {
-    fn C_luaL_newstate() -> *mut C_lua_State;
-    fn C_lua_close(l: *mut C_lua_State);
-    fn C_luaL_openlibs(l: *mut C_lua_State);
-    fn C_call_lua_bytes(l: *mut C_lua_State, bytes: *const u8, size: usize);
+    fn luaL_newstate() -> *mut lua_State;
+    fn lua_close(l: *mut lua_State);
+    fn luaL_openlibs(l: *mut lua_State);
+    fn C_call_lua_bytes(l: *mut lua_State, bytes: *const u8, size: usize);
 }
 
 #[derive(Debug)]
@@ -24,16 +24,16 @@ pub trait Driver {
 
 #[derive(Clone)]
 pub struct LuaVM {
-    state: Arc<Mutex<*mut C_lua_State>>,
+    state: Arc<Mutex<*mut lua_State>>,
 }
 
 impl LuaVM {
     fn clean_state(&mut self) {
         unsafe {
-            let s = C_luaL_newstate();
-            C_luaL_openlibs(s);
+            let s = luaL_newstate();
+            luaL_openlibs(s);
             let mut old_state = self.state.lock().unwrap();
-            C_lua_close(*old_state);
+            lua_close(*old_state);
             *old_state = s;
         }
     }
@@ -44,8 +44,8 @@ unsafe impl Send for LuaVM {}
 impl Driver for LuaVM {
     fn new() -> Self {
         unsafe {
-            let s = C_luaL_newstate();
-            C_luaL_openlibs(s);
+            let s = luaL_newstate();
+            luaL_openlibs(s);
             Self { state: Arc::new(Mutex::new(s)) }
         }
     }

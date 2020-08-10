@@ -1,0 +1,4 @@
+(
+    title: "Scriptable Pong!",
+    dimensions: Some((500, 500)),
+)

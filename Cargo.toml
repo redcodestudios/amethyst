@@ -88,6 +88,9 @@ test-support = [
   "amethyst_window/test-support",
 ]
 experimental-spirv-reflection = ["amethyst_rendy/experimental-spirv-reflection"]
+scripting = [
+    "amethyst_scripting",
+]
 
 [workspace]
 members = [
@@ -130,7 +133,7 @@ amethyst_ui = { path = "amethyst_ui", version = "0.10.1" }
 amethyst_utils = { path = "amethyst_utils", version = "0.10.1" }
 amethyst_window = { path = "amethyst_window", version = "0.5.1" }
 amethyst_tiles = { path = "amethyst_tiles", version = "0.3.1", optional = true }
-amethyst_scripting = { path = "amethyst_scripting", version = "0.0.1" }
+amethyst_scripting = { path = "amethyst_scripting", version = "0.0.1", optional = true }
 crossbeam-channel = "0.4.2"
 derivative = "2.1.1"
 fern = { version = "0.6.0", features = ["colored"] }
@@ -338,6 +341,11 @@ name = "tiles"
 path = "examples/tiles/main.rs"
 required-features = [ "tiles" ]
 
+[[example]]
+name = "scripting"
+path = "examples/scripting/pong.rs"
+required-features = [ "scripting", "vulkan"]
+
 [package.metadata.docs.rs]
-features = ["animation", "audio", "gltf", "tiles", "json", "locale", "network", "sdl_controller", "vulkan"]
+features = ["animation", "audio", "gltf", "tiles", "json", "locale", "network", "sdl_controller", "vulkan", "scripting"]
 

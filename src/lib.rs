@@ -87,6 +87,8 @@ pub use amethyst_ui as ui;
 pub use amethyst_utils as utils;
 pub use amethyst_window as window;
 pub use winit;
+#[cfg(feature = "scripting")]
+pub use amethyst_scripting as scripting;
 
 pub use crate::core::{ecs, shred, shrev};
 #[doc(hidden)]

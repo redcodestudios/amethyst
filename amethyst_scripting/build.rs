@@ -3,7 +3,7 @@ extern crate cc;
 use std::process::Command;
 
 fn main() {
-    if cfg!(tarfet_os = "linux") {
+    if cfg!(target_os = "linux") {
         Command::new("make")
             .current_dir("lua")
             .status()
