@@ -1,0 +1,3 @@
+[submodule "amethyst_scripting/lua"]
+	path = amethyst_scripting/lua
+	url = https://github.com/lua/lua
