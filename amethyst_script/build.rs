@@ -25,8 +25,8 @@ fn main() {
             .compile("lua_vm");
    
         cc::Build::new()
-            .include("python/src/cpython/Include")
-            .include("python/src/cpython")
+            .include("python/cpython/Include")
+            .include("python/cpython")
             .flag("-lpython3.9")
             //.object("../target/debug/libscripting_api.so")
             .file("c_drivers/python_vm.c")
