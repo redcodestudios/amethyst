@@ -1,6 +1,8 @@
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 
+extern crate cbindgen;
+
 #[repr(C)]
 #[derive(Clone)]
 pub struct lua_State { private: [u8; 0] }
@@ -57,4 +59,13 @@ impl Driver for LuaVM {
             C_call_lua_bytes(s, source.as_ptr(), source.len());
         }
     }
+}
+
+pub fn load_components(path: PathBuf) {
+    cbindgen::Builder::new()
+        .with_src(path)
+        .with_language(cbindgen::Language::C)
+        .generate()
+        .unwrap()
+        .write_to_file("amethyst_scripting/c_drivers/generated_engine.h");
 }

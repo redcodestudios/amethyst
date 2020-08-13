@@ -3,7 +3,8 @@
 #include <lualib.h> 
 
 /* #include <custom_engine.h> */
-/* #include <generated_engine.h> */
+#include <generated_engine.h>
+#include <color.h>
 
 #include <stdio.h>
 
@@ -55,12 +56,36 @@
 /*     lua_setglobal(L, "Transform"); */
 /* } */
 
-void C_call_lua_bytes(lua_State* state, const unsigned char* source, size_t size) {
+void C_call_lua_bytes(lua_State* state, const unsigned char* source, size_t size) { 
     if(luaL_loadbuffer(state, source, size, "script xaaab")){
         fprintf(stderr, "Lua `ERROR`: `%s\n`", lua_tostring(state, -1));
     }
     if(lua_pcall(state, 0, 0, 0)){
         fprintf(stderr, "Lua `ERROR`: `%s\n`", lua_tostring(state, -1));
+    }
+}
+
+void C_setup_lua_script(lua_State* state, const unsigned char* source, size_t size, const char* script) {
+    if (luaL_loadbuffer(state, source, size, script) || lua_pcall(state, 0, 0, 0)) {
+        printf("error buffer: %s", lua_tostring(state, -1));
+        return -1;
+    }
+
+    int status = lua_getglobal(state, "reads");
+    
+
+}
+
+void C_run_lua_script(lua_State* state, const unsigned char* source, size_t size, const char* script) {
+    if (luaL_loadbuffer(state, source, size, script) || lua_pcall(state, 0, 0, 0)) {
+        printf("error buffer: %s", lua_tostring(state, -1));
+        return -1;
+    }
+    int status = lua_getglobal(state, "run");
+
+    // preparar parametros antes
+    if(lua_pcall(state, 0, 1, 0) != 0) {
+        printf("error running function `run`: %s\n", lua_tostring(state, -1));
     }
 }
 

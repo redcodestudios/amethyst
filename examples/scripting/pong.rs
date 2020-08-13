@@ -5,7 +5,7 @@ use amethyst::{
     ecs::{storage::Storage, VecStorage, Component},
     scripting::{
         bundle::ScriptBundle,
-        driver::Language,
+        driver::{Language, load_components},
         asset::Script,
         formats::{LuaFormat, ScriptData},
     },
@@ -41,6 +41,12 @@ fn initialize_ball(world: &mut World, sprite_sheet_handle: Handle<SpriteSheet>) 
         sprite_sheet: sprite_sheet_handle,
         sprite_number: 1,
     };
+
+    world
+        .create_entity()
+        .with(sprite_render)
+        .with(local_transform)
+        .build();
 }
 
 fn load_sprite_sheet(world: &mut World) -> Handle<SpriteSheet> {
@@ -104,6 +110,8 @@ fn main() -> amethyst::Result<()> {
                 .with_language(Language::Lua(lua_scripts_path))
         )?;
     
+    load_components(app_root.join("examples/scripting/components.rs"));
+
     let mut game = Application::new(assets_dir, Pong::default(), game_data)?;
     game.run();
     Ok(())
