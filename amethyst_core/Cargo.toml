@@ -19,17 +19,22 @@ license = "MIT/Apache-2.0"
 amethyst_error = { path = "../amethyst_error", version = "0.15.3" }
 fern = { version = "0.6", features = ["colored"] }
 type-uuid = "0.1"
-log = "0.4"
+log = { version = "0.4", features = ["serde"] }
 num-traits = "0.2.11"
 serde = { version = "1", features = ["derive"] }
 approx = "0.4"
 derive-new = "0.5"
 getset = "0.1.1"
-legion = { version = "0.3.1", default-features = false, features = [
-    "serialize",
-    "crossbeam-events",
-    "codegen",
-] }
+# legion = { version = "0.3.1", default-features = false, features = [
+#     "serialize",
+#     "crossbeam-events",
+#     "codegen",
+# ] }
+legion = { git = "https://github.com/redcodestudios/legion", default_features = false, features = [
+         "serialize",
+         "crossbeam-events",
+         "codegen",
+]}
 nalgebra = { version = "0.24", default-features = false, features = ["serde-serialize"] }
 rayon = "1.5"
 shrev = "1.1.1"

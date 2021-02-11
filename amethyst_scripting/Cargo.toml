@@ -1,0 +1,28 @@
+[package]
+name = "amethyst_scripting"
+version = "0.1.0"
+authors = ["Rodrigo Oliveira <rodrigo.redcode@gmail.com>", "Pablo Diego <pablodiegoss@hotmail.com>"]
+edition = "2018"
+description = "Scripting system for multiple languages"
+keywords = ["game", "engine", "scripting", "script", "amethyst"]
+categories = ["scripting", "scripting::engine"]
+license = "MIT/Apache-2.0"
+
+[build-dependencies]
+cbindgen = "0.14.3"
+cc = "1.0.59"
+
+[dependencies]
+amethyst_core = { path = "../amethyst_core" }
+# amethyst_assets = { path = "../amethyst_assets" }
+amethyst_error = { path = "../amethyst_error" }
+
+# legion = {path = "./legion"}
+easy_ffi = "0.1.0"
+log = "0.4.11"
+simple_logger = "1.9.0"
+
+[[example]]
+name = "hello"
+path = "examples/hello.rs"
+

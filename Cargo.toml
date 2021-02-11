@@ -25,7 +25,7 @@ crate-type = ["lib"]
 
 [features]
 default = ["parallel", "renderer", "utils", "no-slow-safety-checks"]
-optional = ["audio", "network", "locale", "ui", "tiles", "animation"]
+optional = ["audio", "network", "locale", "ui", "tiles", "animation", "scripting"]
 
 tiles = ["amethyst_tiles"]
 animation = ["amethyst_animation"]
@@ -40,6 +40,8 @@ ui = ["amethyst_ui", "amethyst_animation/ui"]
 empty = ["amethyst_rendy/empty"]
 vulkan = ["amethyst_rendy/vulkan"]
 metal = ["amethyst_rendy/metal"]
+
+scripting = ["amethyst_scripting"]
 
 profiler = [
     "thread_profiler",
@@ -111,6 +113,7 @@ amethyst_ui = { path = "amethyst_ui", version = "0.15.3", optional = true }
 amethyst_utils = { path = "amethyst_utils", version = "0.15.3", optional = true }
 amethyst_window = { path = "amethyst_window", version = "0.15.3" }
 amethyst_tiles = { path = "amethyst_tiles", version = "0.15.3", optional = true }
+amethyst_scripting = { path = "amethyst_scripting", version = "0.1.0", optional = true }
 winit = { version = "0.24", git = "https://github.com/rust-windowing/winit", rev = "38fccebe1fbc4226c75d6180e5317bd93c024951", features = ["serde"] }
 crossbeam-channel = "0.5"
 derivative = "2.1.1"
@@ -124,11 +127,16 @@ thread_profiler = { version = "0.3.0", optional = true }
 lazy_static = "1.4.0"
 glsl-layout = "0.4"
 # until https://github.com/amethyst/legion/pull/186 passed
-legion = { version = "0.3", default-features = false, features = [
-    "serialize",
-    "crossbeam-events",
-    "codegen",
-] }
+# legion = { version = "0.3", default-features = false, features = [
+#     "serialize",
+#     "crossbeam-events",
+#     "codegen",
+# ] }
+legion = { git = "https://github.com/redcodestudios/legion", default_features = false, features = [
+         "serialize",
+         "crossbeam-events",
+         "codegen",
+]}
 
 [build-dependencies]
 dirs-next = "2.0.0"
@@ -155,4 +163,5 @@ features = [
     "ui",
     "sdl_controller",
     "vulkan",
+    "scripting",
 ]
